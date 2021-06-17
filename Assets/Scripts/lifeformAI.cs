@@ -7,14 +7,28 @@ public class lifeformAI : MonoBehaviour
     public float speed;
     public float accuracy;
     public float radius;
+    public GameObject food;
+    public int foodCount;
+    public Vector3 min;
+    public Vector3 max;
+    
+    private float xAxis;
+    private float yAxis;
+    private Vector3 randomPosition;
+
+    private int score = 0;
+
 
     private bool isMovingToFood;
-    private bool isSeekingFood;
-    private List<Food> memory;
+    private bool isSeeking;
+    private Coroutine randomCoroutine = null;
+    private Vector3 randomDir;
+    private Food targetFood;
+    private List<Food> memory;  
 
-    //Memory utilities
+    //Memory utilities 
     void rememberFood(Food food)
-    {
+    {   
         memory.Add(food);
     }
 
@@ -28,46 +42,112 @@ public class lifeformAI : MonoBehaviour
         return memory[0];
     }
 
+    IEnumerator getRandomDirection()
+    {
+        while(true){
+            randomDir = Random.insideUnitCircle.normalized;
+            //Debug.Log(randomDir);
+            yield return new WaitForSeconds(.5f);   
+        }        
+    }
+
+    void spawnFood()
+    {
+        for(int i = 0; i < foodCount; i++)
+        {
+            xAxis = UnityEngine.Random.Range(min.x, max.x);
+            yAxis = UnityEngine.Random.Range(min.y, max.y);
+            randomPosition = new Vector3(xAxis, yAxis, 0);
+
+            Instantiate(food, randomPosition , Quaternion.identity);
+        }
+    }
+
     //Function to seek food and determine if a food source is in distance
     void seekFood()
     {
         GameObject[] allFoods = GameObject.FindGameObjectsWithTag("Food");
 
-        for(int i = 0; i < allFoods.Length; i++)
+        if(isMovingToFood)
         {
-            Vector3 direction = allFoods[i].transform.position - this.transform.position;
-            float distance = direction.magnitude;
-
-            if(distance < radius)
+            if(targetFood != null)
             {
-                Food targetFood = new Food(allFoods[i], direction, distance);
+                targetFood.direction = targetFood.foodObject.transform.position - this.transform.position;
+                targetFood.distance = targetFood.direction.magnitude;
+
                 moveToFood(targetFood);
+            }else{
+                seekFood();
             }
-        }
+        }else{
+            for(int i = 0; i < allFoods.Length; i++)
+            {
+                Vector3 direction = allFoods[i].transform.position - this.transform.position;
+                float distance = direction.magnitude;
+
+                if(distance < radius)
+                {
+                    isSeeking = false;
+                    if(!isMovingToFood)
+                    {
+                        StopCoroutine(randomCoroutine);
+                    }                    
+                    isMovingToFood = true;
+                    targetFood = new Food(allFoods[i], direction, distance);
+                    moveToFood(targetFood);               
+                }else
+                {
+                    if(!isSeeking)
+                    {
+                        randomCoroutine = StartCoroutine(getRandomDirection());
+                        isSeeking = true;
+                    }
+                    moveToRandom();
+                }
+            }       
+        }                       
     }
 
     //Function to move lifeform to target food source
     void moveToFood(Food targetFood)
-    {        
+    {       
+        //Debug.DrawRay(this.transform.position, targetFood.direction, Color.red); 
         if(targetFood.distance > accuracy)
         {            
             this.transform.Translate(targetFood.direction.normalized * speed * Time.deltaTime);
-        }else if(targetFood.distance == accuracy)
+        }else
         {
+            isMovingToFood = false;
+            score += targetFood.nutrition;
             Destroy(targetFood.foodObject);
         }
+    }
+
+    void moveToRandom()
+    {               
+        this.transform.Translate(randomDir * Time.deltaTime);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        memory = new List<Food>();
+        isMovingToFood = false;
+
+        spawnFood();
+        randomCoroutine = StartCoroutine(getRandomDirection());
     }
 
     // Update is called once per frame
     void LateUpdate()
     {
-        seekFood();
+        if(score >= 200)
+        {
+            score = 0;
+            Instantiate(gameObject);
+            //spawnFood();
+        }
+        seekFood();        
     }
 
     //Food subclass
@@ -82,7 +162,7 @@ public class lifeformAI : MonoBehaviour
             foodObject = _foodObject;
             direction = _direction;
             distance = _distance;
-        }
+        }       
     }
 }
 
