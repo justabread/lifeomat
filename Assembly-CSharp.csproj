@@ -36,7 +36,9 @@
     <ImplicitlyExpandDesignTimeFacades>false</ImplicitlyExpandDesignTimeFacades>
   </PropertyGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\lifeformAI.cs" />
+     <Compile Include="Assets\Scripts\camera_script.cs" />
+     <Compile Include="Assets\Scripts\gameController_script.cs" />
+     <Compile Include="Assets\Scripts\lifeformAI_script.cs" />
     <Reference Include="UnityEngine">
         <HintPath>C:/Program Files/Unity/Hub/Editor/2019.4.16f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
