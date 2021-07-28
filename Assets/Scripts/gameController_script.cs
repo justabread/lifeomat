@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class gameController_script : MonoBehaviour
 {
+    public float spawnInterval = 60.0f;
+    public int foodCount = 100;
     public GameObject food;
     public Vector3 min;
     public Vector3 max;
@@ -14,7 +16,7 @@ public class gameController_script : MonoBehaviour
 
     void SpawnFood()
     {
-        for(int i = 0; i < 100; i++)
+        for(int i = 0; i < foodCount; i++)
         {
             xAxis = UnityEngine.Random.Range(min.x, max.x);
             yAxis = UnityEngine.Random.Range(min.y, max.y);
@@ -27,6 +29,6 @@ public class gameController_script : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        InvokeRepeating("SpawnFood", 0.0f, 60.0f);
+        InvokeRepeating("SpawnFood", 0.0f, spawnInterval);
     }
 }

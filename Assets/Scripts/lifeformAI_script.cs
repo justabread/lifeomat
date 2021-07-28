@@ -8,6 +8,7 @@ public class lifeformAI_script : MonoBehaviour
     public float accuracy;
     public GameObject food;
     public int hunger;
+    public int mutationChance = 10;
 
     //private variables
     private CircleCollider2D playerSight;
@@ -64,6 +65,28 @@ public class lifeformAI_script : MonoBehaviour
         }        
     }
 
+    void Mitosis()
+    {
+        healthAtMitosis = health;
+        GameObject clone = Instantiate(gameObject);
+        if(Random.Range(0, mutationChance) == 1)
+        {
+            clone.GetComponent<CircleCollider2D>().radius = Random.Range(1, 100);
+            Debug.Log("Radius: " + clone.GetComponent<CircleCollider2D>().radius);
+        }        
+        if(Random.Range(0, mutationChance) == 1)
+        {
+            clone.GetComponent<lifeformAI_script>().speed = Random.Range(1, 100);
+            Debug.Log("Speed: " + clone.GetComponent<lifeformAI_script>().speed);
+        }       
+        if(Random.Range(0, mutationChance) == 1)
+        {
+            float newScale = Random.Range(0.1f,5f);
+            clone.transform.localScale = new Vector3(newScale, newScale, newScale);
+            Debug.Log("Size: " + clone.transform.localScale);
+        }        
+    }
+
     void OnTriggerStay2D(Collider2D other) {
         if(other.gameObject.tag == "Food")
         {
@@ -86,17 +109,19 @@ public class lifeformAI_script : MonoBehaviour
 
         Vector3 direction = targetFood.foodObject.transform.position - this.transform.position;
         float distance = direction.magnitude;
+        
 
-        if(distance > accuracy)
+        if (distance > accuracy)
         {            
             this.transform.Translate(direction.normalized * speed * Time.deltaTime);
-        }else
+        }
+        else
         {
             isMovingToFood = false;
             health += targetFood.nutrition;
             Destroy(targetFood.foodObject);
         }
-        //Debug.DrawRay(this.transform.position, targetFood.direction, Color.red); 
+        
         
     }
 
@@ -119,11 +144,8 @@ public class lifeformAI_script : MonoBehaviour
     {
         if(health >= healthAtMitosis + 100)
         {
-            healthAtMitosis = health;
-            Instantiate(gameObject);
-            //spawnFood();
+            Mitosis();
         }
-        //SeekFood();
         if(isMovingToFood)
         {
             MoveToFood(targetFood);
@@ -143,5 +165,3 @@ public class lifeformAI_script : MonoBehaviour
         }       
     }
 }
-
-

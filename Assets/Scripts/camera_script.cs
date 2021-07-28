@@ -4,19 +4,22 @@ using UnityEngine;
 
 public class camera_script : MonoBehaviour
 {
+    public int zoomSpeed;
     public float panSpeed;
+    public int minZoom = 10;
+    public int maxZoom = 160;
 
     // Update is called once per frame
     void LateUpdate()
     {
-        if (Input.GetAxis("Mouse ScrollWheel") > 0 && Camera.main.orthographicSize > 5)
+        if (Input.GetAxis("Mouse ScrollWheel") > 0 && Camera.main.orthographicSize > minZoom)
         {
-            Camera.main.orthographicSize--;
+            Camera.main.orthographicSize = Camera.main.orthographicSize - zoomSpeed;
         }
 
-        if (Input.GetAxis("Mouse ScrollWheel") < 0 && Camera.main.orthographicSize < 80)
+        if (Input.GetAxis("Mouse ScrollWheel") < 0 && Camera.main.orthographicSize < maxZoom)
         {
-            Camera.main.orthographicSize++;
+            Camera.main.orthographicSize = Camera.main.orthographicSize + zoomSpeed; ;
         }
 
         if (Input.GetMouseButton(0)) // right mouse button
